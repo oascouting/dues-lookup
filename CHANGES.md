@@ -1,5 +1,6 @@
 #### unreleased changes
 
+* Update example Membership Card with new branding
 * Minimum supported PHP is now 8.1
 * Minimum supported WordPress is now 5.9
 * Use WordPress to generate timestamps on the admin page instead of MySQL so that dates shown to the admin are in the admin's chosen timezone even if the database server is in a different one. 
