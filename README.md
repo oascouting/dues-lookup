@@ -6,13 +6,13 @@
 
 ## Wordpress Compatibility
 
-*Requires at least:* 3.0.1
-*Tested up to:* 5.9
+*Requires at least:* 5.9
+*Tested up to:* 7.0
 
 ## PHP Compatibility
 
-*Requires at least:* 8.0.x
-*Tested up to:* 8.2.x
+*Requires at least:* 8.1.x
+*Tested up to:* 8.5.x
 
 *License:* GPLv2 or later
 

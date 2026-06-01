@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: php-actions/composer@v6
       with:
-        php_version: 8.0
+        php_version: 8.1
         php_extensions: gd zip
         dev: no
         args: --optimize-autoloader --apcu-autoloader
@@ -20,7 +20,7 @@ jobs:
       with:
         type: 'zip'
         filename: "dues-lookup-${{ steps.lasttag.outputs.tag }}.zip"
-        exclusions: '*DOCKER_ENV *docker_tag *output.log *.git*'
+        exclusions: '*DOCKER_ENV *docker_tag *output.log *.git* *.vscode* *phpcs.xml.dist '
         directory: '..'
         path: 'dues-lookup'
     - uses: ncipollo/release-action@v1

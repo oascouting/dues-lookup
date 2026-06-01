@@ -4,8 +4,8 @@
  * Plugin URI: https://github.com/oabsa/dues-lookup/
  * Description: Wordpress plugin to use in conjunction with OA LodgeMaster to allow members to look up when they last paid dues
  * Version: 2.6
- * Requires at least: 3.0.1
- * Requires PHP: 8.0
+ * Requires at least: 5.9
+ * Requires PHP: 8.1
  * Author: Dave Miller
  * Author URI: http://twitter.com/justdavemiller
  * Author Email: github@justdave.net

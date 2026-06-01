@@ -1,0 +1,14 @@
+{
+  "phpcs.enable": true,
+  "phpcs.executablePath": "${workspaceFolder}/vendor/bin/phpcs",
+  "phpcs.standard": "${workspaceFolder}/phpcs.xml.dist",
+  "phpcs.autoConfigSearch": false,
+  "phpcs.showSources": true,
+  "[php]": {
+    "editor.defaultFormatter": "vscode.php-language-features"
+  },
+  "php.stubs": [        
+    "*",
+   "wordpress"
+  ]
+}
