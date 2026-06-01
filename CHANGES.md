@@ -1,3 +1,7 @@
+#### unreleased changes
+
+* Use WordPress to generate timestamps on the admin page instead of MySQL so that dates shown to the admin are in the admin's chosen timezone even if the database server is in a different one. 
+
 #### 2.6 / 2024-12-09
 
 * Full rebrand to the new Scouting America terminology.

@@ -103,7 +103,7 @@ foreach ($objWorksheet->getRowIterator() as $row) {
             ob_start();
             # Make an empty temporary table based on the dues_data table
             $wpdb->query("CREATE TEMPORARY TABLE {$dbprefix}dues_data_temp (PRIMARY KEY (memberid)) SELECT * FROM {$dbprefix}dues_data LIMIT 0");
-            $oadueslookup_last_import = $wpdb->get_var("SELECT DATE_FORMAT(NOW(), '%Y-%m-%d')");
+            $oadueslookup_last_import = current_time('Y-m-d');
             # re-insert the test data
             oadueslookup_insert_sample_data();
             # now we're ready for the incoming from the rest of the file.
