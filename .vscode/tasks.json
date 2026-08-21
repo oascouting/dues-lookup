@@ -1,0 +1,69 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Composer: Install",
+            "type": "shell",
+            "command": "composer",
+            "args": [
+                "install"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "PHPCS: Lint Plugin",
+            "type": "shell",
+            "command": "./vendor/bin/phpcs",
+            "args": [
+                "--standard=phpcs.xml.dist",
+                "--report=emacs"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                {
+                    "owner": "php",
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}"
+                    ],
+                    "pattern": {
+                        "regexp": "^([^:]+):(\\d+):(\\d+):\\s+(error|warning)\\s+-\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ]
+        },
+        {
+            "label": "PHPCBF: Fix Plugin",
+            "type": "shell",
+            "command": "./vendor/bin/phpcbf",
+            "args": [
+                "--standard=phpcs.xml.dist",
+                "--report=emacs"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                {
+                    "owner": "php",
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}"
+                    ],
+                    "pattern": {
+                        "regexp": "^([^:]+):(\\d+):(\\d+):\\s+(error|warning)\\s+-\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ]
+        }
+    ]
+}

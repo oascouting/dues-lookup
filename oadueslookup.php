@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/oascouting/dues-lookup/
  * Description: Wordpress plugin to use in conjunction with OA LodgeMaster to allow members to look up when they last paid dues
  * Version: 2.7.1
- * Requires at least: 5.9
+ * Requires at least: 6.2
  * Requires PHP: 8.1
  * Author: Dave Miller
  * Author URI: http://twitter.com/justdavemiller
@@ -41,37 +41,12 @@ add_action('wp_enqueue_scripts', 'oadueslookup_enqueue_css');
 
 function oadueslookup_enqueue_css()
 {
-    wp_register_style('oadueslookup-style', plugins_url('style.css', __FILE__));
+    wp_register_style('oadueslookup-style', plugins_url('style.css', __FILE__), array(), filemtime(__DIR__ . '/style.css'));
     wp_enqueue_style('oadueslookup-style');
 }
 
 global $oadueslookup_db_version;
 $oadueslookup_db_version = 4;
-
-function oadueslookup_create_table($ddl)
-{
-    global $wpdb;
-    $table = "";
-    if (preg_match("/create table\s+(\w+)\s/i", $ddl, $match)) {
-        $table = $match[1];
-    } else {
-        return false;
-    }
-    foreach ($wpdb->get_col("SHOW TABLES", 0) as $tbl) {
-        if ($tbl == $table) {
-            return true;
-        }
-    }
-    // if we get here it doesn't exist yet, so create it
-    $wpdb->query($ddl);
-    // check if it worked
-    foreach ($wpdb->get_col("SHOW TABLES", 0) as $tbl) {
-        if ($tbl == $table) {
-            return true;
-        }
-    }
-    return false;
-}
 
 function oadueslookup_install()
 {
@@ -91,7 +66,10 @@ function oadueslookup_install()
     // only if it doesn't exist yet. If the columns or indexes need to
     // change it'll need update code (see below).
 
-    $sql = "CREATE TABLE {$dbprefix}dues_data (
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query(
+        $wpdb->prepare(
+            "CREATE TABLE IF NOT EXISTS %i (
   memberid                 INT NOT NULL,
   max_dues_year            VARCHAR(4),
   dues_paid_date           DATE,
@@ -100,9 +78,12 @@ function oadueslookup_install()
   scouting_reg_overridden  TINYINT(1),
   scouting_verify_date     DATE,
   scouting_verify_status   VARCHAR(50),
-  PRIMARY KEY (memberid)
-);";
-    oadueslookup_create_table($sql);
+    PRIMARY KEY (memberid)
+);",
+                        "{$dbprefix}dues_data"
+                )
+        );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
 
     //
     // DATABASE UPDATE CODE
@@ -128,28 +109,36 @@ function oadueslookup_install()
 
     if ($installed_version < 2) {
         # Add a column for the Last Audit Date field
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data ADD COLUMN reg_audit_date DATE");
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD COLUMN reg_audit_date DATE", "{$dbprefix}dues_data"));
     }
 
     if ($installed_version < 3) {
         # Drop the old registration audit fields for OALM 4.1.2 or below.
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data DROP COLUMN reg_audit_date");
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data DROP COLUMN reg_audit_result");
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i DROP COLUMN reg_audit_date", "{$dbprefix}dues_data"));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i DROP COLUMN reg_audit_result", "{$dbprefix}dues_data"));
         # Add the columns for the BSA registration fields in OALM 4.2.0 and above.
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data ADD COLUMN bsa_reg TINYINT(1)");
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data ADD COLUMN bsa_reg_overridden TINYINT(1)");
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data ADD COLUMN bsa_verify_date DATE");
-        $wpdb->query("ALTER TABLE {$dbprefix}dues_data ADD COLUMN bsa_verify_status VARCHAR(50)");
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD COLUMN bsa_reg TINYINT(1)", "{$dbprefix}dues_data"));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD COLUMN bsa_reg_overridden TINYINT(1)", "{$dbprefix}dues_data"));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD COLUMN bsa_verify_date DATE", "{$dbprefix}dues_data"));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i ADD COLUMN bsa_verify_status VARCHAR(50)", "{$dbprefix}dues_data"));
     }
 
     if ($installed_version < 4) {
         # BSA became Scouting America, so change the column names appropriately
-        $wpdb->query("ALTER TABLE `{$dbprefix}dues_data` " .
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+        $wpdb->query($wpdb->prepare("ALTER TABLE %i " .
             "CHANGE COLUMN `bsaid` `memberid` INT NOT NULL , " .
             "CHANGE COLUMN `bsa_reg` `scouting_reg` TINYINT(1) NULL DEFAULT NULL , " .
             "CHANGE COLUMN `bsa_reg_overridden` `scouting_reg_overridden` TINYINT(1) NULL DEFAULT NULL , " .
             "CHANGE COLUMN `bsa_verify_date` `scouting_verify_date` DATE NULL DEFAULT NULL , " .
-            "CHANGE COLUMN `bsa_verify_status` `scouting_verify_status` VARCHAR(50) NULL DEFAULT NULL");
+            "CHANGE COLUMN `bsa_verify_status` `scouting_verify_status` VARCHAR(50) NULL DEFAULT NULL", "{$dbprefix}dues_data"));
     }
 
     // insert next database revision update code immediately above this line.
@@ -235,7 +224,8 @@ function oadueslookup_insert_sample_data()
     global $wpdb;
     $dbprefix = $wpdb->prefix . "oalm_";
 
-    $wpdb->query("INSERT INTO {$dbprefix}dues_data_temp " .
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($wpdb->prepare("INSERT INTO %i " .
         "(memberid,    max_dues_year, dues_paid_date, level,        scouting_reg,   scouting_reg_overridden, scouting_verify_date, scouting_verify_status) VALUES " .
         "('123453','2013',         '2012-11-15',   'Brotherhood','1',       '0',                '1900-01-01',   'Member ID Not Found'), " .
         "('123454','2014',         '2013-12-28',   'Ordeal',     '1',       '0',                '1900-01-01',   'Member ID Not Found'), " .
@@ -243,8 +233,9 @@ function oadueslookup_insert_sample_data()
         "('123456','2013',         '2013-07-15',   'Ordeal',     '1',       '0',                '1900-01-01',   'Member ID Verified'), " .
         "('123457','2014',         '2013-12-18',   'Brotherhood','0',       '0',                '1900-01-01',   'Member ID Found - Data Mismatch'), " .
         "('123458','2013',         '2013-03-15',   'Vigil',      '1',       '0',                '1900-01-01',   'Member ID Not Found'), " .
-        "('123459','2015',         '2014-03-15',   'Ordeal',     '0',       '0',                '1900-01-01',   'Never Run')");
-    $wpdb->query($wpdb->prepare("UPDATE {$dbprefix}dues_data SET scouting_verify_date=%s", get_option('oadueslookup_last_update')));
+        "('123459','2015',         '2014-03-15',   'Ordeal',     '0',       '0',                '1900-01-01',   'Never Run')", "{$dbprefix}dues_data_temp"));
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($wpdb->prepare("UPDATE %i SET scouting_verify_date=%s", "{$dbprefix}dues_data", get_option('oadueslookup_last_update')));
 }
 
 function oadueslookup_install_data()
@@ -253,11 +244,13 @@ function oadueslookup_install_data()
     $dbprefix = $wpdb->prefix . "oalm_";
 
     # Make an empty temporary table based on the dues_data table
-    $wpdb->query("CREATE TEMPORARY TABLE {$dbprefix}dues_data_temp SELECT * FROM {$dbprefix}dues_data LIMIT 0");
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query($wpdb->prepare("CREATE TEMPORARY TABLE %i SELECT * FROM %i LIMIT 0", "{$dbprefix}dues_data_temp", "{$dbprefix}dues_data"));
     # load some sample data into it
     oadueslookup_insert_sample_data();
     # and copy the contents of the temporary table into the real one
-    $wpdb->query("INSERT INTO {$dbprefix}dues_data SELECT * FROM {$dbprefix}dues_data_temp");
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($wpdb->prepare("INSERT INTO %i SELECT * FROM %i", "{$dbprefix}dues_data", "{$dbprefix}dues_data_temp"));
 }
 
 # Let admin users know about version 2.1 shortcode migration

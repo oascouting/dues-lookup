@@ -1,3 +1,7 @@
+#### unreleased changes
+
+* Minimum supported WordPress is now 6.2 to support database management requirements
+
 #### 2.7.1 / 2026-08-11
 
 * Fix a crash caused by dependencies getting checked before `plugins_loadad`

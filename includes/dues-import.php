@@ -26,8 +26,10 @@ add_action( 'admin_enqueue_scripts', 'oadueslookup_admin_enqueue_scripts' );
 function oadueslookup_admin_enqueue_scripts() {
     $screen = get_current_screen();
     if ($screen->id == 'oa-tools_page_oadueslookup_import') {
-        wp_enqueue_script('oalm-upload-widget-js', plugins_url('js/upload-widget.js?v=1', dirname(__FILE__)));
-        wp_enqueue_style( 'oalm-upload-widget-css', plugins_url('css/upload-widget.css?v=1', dirname(__FILE__)));
+        $js_path = dirname(__FILE__) . '/../js/upload-widget.js';
+        $css_path = dirname(__FILE__) . '/../css/upload-widget.css';
+        wp_enqueue_script('oalm-upload-widget-js', plugins_url('js/upload-widget.js', dirname(__FILE__)), array(), filemtime($js_path));
+        wp_enqueue_style( 'oalm-upload-widget-css', plugins_url('css/upload-widget.css', dirname(__FILE__)), array(), filemtime($css_path));
         wp_localize_script( 'oalm-upload-widget-js', 'oalm', array(
             'wp_ajax_url' => admin_url( 'admin-ajax.php' ),
             'wp_site_url' => site_url(),
@@ -155,7 +157,7 @@ add_action( 'wp_ajax_oalm_ack_complete', 'oalm_ack_complete' );
 function oalm_ack_complete() {
     $dir = wp_upload_dir()['basedir'] . "/dues-lookup/";
     if (file_exists($dir . 'import.xlsx')) {
-        unlink($dir . 'import.xlsx');
+        wp_delete_file($dir . 'import.xlsx');
     }
     update_option('oadueslookup_import_status', [
         'status' => 'waiting',

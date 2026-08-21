@@ -12,7 +12,21 @@
 
   <exclude-pattern>*/vendor/*</exclude-pattern>
 
-  <rule ref="WordPress-Core"/>
-  <rule ref="WordPress-Extra"/>
-  <rule ref="WordPress-Docs"/>
+  <!-- Keep runtime and review concerns visible without enforcing formatting or docs. -->
+  <rule ref="WordPress.Security"/>
+  <rule ref="WordPress.DB"/>
+  <rule ref="WordPress.WP.I18n"/>
+  <rule ref="WordPress.WP.EnqueuedResourceParameters"/>
+  <rule ref="WordPress.WP.AlternativeFunctions"/>
+  <rule ref="WordPress.PHP.DiscouragedPHPFunctions"/>
+  <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+    <properties>
+      <property name="prefixes" type="array">
+        <element value="oadueslookup"/>
+        <element value="oalm"/>
+        <element value="oa_tools"/>
+      </property>
+    </properties>
+  </rule>
+  <rule ref="Generic.PHP.ForbiddenFunctions"/>
 </ruleset>

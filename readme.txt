@@ -1,7 +1,7 @@
 # OA Dues Lookup
 Contributors: Dave Miller, Steven Hall, Eric Silva
 Tags: Order of the Arrow, BSA, OA, dues, Boy Scouts
-Requires at least: 5.9
+Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
 License: GPLv2 or later

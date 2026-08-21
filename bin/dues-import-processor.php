@@ -99,10 +99,12 @@ foreach ($objWorksheet->getRowIterator() as $row) {
         } else {
             #echo "<strong>Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
             # we just validated that we have a good data file, nuke the existing data
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->show_errors();
             ob_start();
             # Make an empty temporary table based on the dues_data table
-            $wpdb->query("CREATE TEMPORARY TABLE {$dbprefix}dues_data_temp (PRIMARY KEY (memberid)) SELECT * FROM {$dbprefix}dues_data LIMIT 0");
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+            $wpdb->query($wpdb->prepare("CREATE TEMPORARY TABLE %i (PRIMARY KEY (memberid)) SELECT * FROM %i LIMIT 0", "{$dbprefix}dues_data_temp", "{$dbprefix}dues_data"));
             $oadueslookup_last_import = current_time('Y-m-d');
             # re-insert the test data
             oadueslookup_insert_sample_data();
@@ -137,6 +139,7 @@ foreach ($objWorksheet->getRowIterator() as $row) {
                 $rowData[$columnMap[$columnName]] = $value;
             }
         }
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         if ($wpdb->insert($dbprefix . "dues_data_temp", $rowData, array('%s','%s','%s','%s','%d','%d','%s','%s'))) {
             $recordcount++;
         }
@@ -152,8 +155,10 @@ $treat_errors_as_fatal = false;
 
 if ((!$treat_errors_as_fatal) || (!$error_output)) {
     # delete the contents of the live table and copy the contents of the temp table to it
-    $wpdb->query("TRUNCATE TABLE {$dbprefix}dues_data");
-    $wpdb->query("INSERT INTO {$dbprefix}dues_data SELECT * FROM {$dbprefix}dues_data_temp");
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+    $wpdb->query($wpdb->prepare("TRUNCATE TABLE %i", "{$dbprefix}dues_data"));
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query($wpdb->prepare("INSERT INTO %i SELECT * FROM %i", "{$dbprefix}dues_data", "{$dbprefix}dues_data_temp"));
 }
 $error_output .= ob_get_clean();
 if ((!$treat_errors_as_fatal) || (!$error_output)) {
@@ -171,4 +176,5 @@ if (!$error_output) {
 $import_status['output'] = ob_get_clean();
 $import_status['status'] = 'completed';
 update_option('oadueslookup_import_status', $import_status);
-update_option('oadueslookup_last_update', $wpdb->get_var("SELECT DATE_FORMAT(MAX(dues_paid_date), '%Y-%m-%d') FROM {$dbprefix}dues_data"));
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+update_option('oadueslookup_last_update', $wpdb->get_var($wpdb->prepare("SELECT DATE_FORMAT(MAX(dues_paid_date), '%%Y-%%m-%%d') FROM %i", "{$dbprefix}dues_data")));

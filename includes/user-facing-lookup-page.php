@@ -28,7 +28,8 @@ function oadueslookup_user_page($attr)
     if (isset($_POST['memberid'])) {
         $memberid = trim($_POST['memberid']);
         if (preg_match('/^\d+$/', $memberid)) {
-            $results = $wpdb->get_row($wpdb->prepare("SELECT max_dues_year, dues_paid_date, level, scouting_reg, scouting_reg_overridden, scouting_verify_date, scouting_verify_status FROM {$dbprefix}dues_data WHERE memberid = %d", array($memberid)));
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $results = $wpdb->get_row($wpdb->prepare("SELECT max_dues_year, dues_paid_date, level, scouting_reg, scouting_reg_overridden, scouting_verify_date, scouting_verify_status FROM %i WHERE memberid = %d", "{$dbprefix}dues_data", $memberid));
             if (!isset($results)) {
                 ?>
 <div class="oalm_dues_bad"><p>Your Scouting Member ID <?php echo htmlspecialchars($memberid) ?> was not found.</p></div>
